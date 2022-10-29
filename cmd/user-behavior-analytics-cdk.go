@@ -1,45 +1,36 @@
 package main
 
 import (
+	"time"
+	"user-behavior-analytics-cdk/infra"
+
 	"github.com/aws/aws-cdk-go/awscdk/v2"
-	// "github.com/aws/aws-cdk-go/awscdk/v2/awssqs"
-	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
 )
-
-type UserBehaviorAnalyticsCdkStackProps struct {
-	awscdk.StackProps
-}
-
-func NewUserBehaviorAnalyticsCdkStack(scope constructs.Construct, id string, props *UserBehaviorAnalyticsCdkStackProps) awscdk.Stack {
-	var sprops awscdk.StackProps
-	if props != nil {
-		sprops = props.StackProps
-	}
-	stack := awscdk.NewStack(scope, &id, &sprops)
-
-	// The code that defines your stack goes here
-
-	// example resource
-	// queue := awssqs.NewQueue(stack, jsii.String("UserBehaviorAnalyticsCdkQueue"), &awssqs.QueueProps{
-	// 	VisibilityTimeout: awscdk.Duration_Seconds(jsii.Number(300)),
-	// })
-
-	return stack
-}
 
 func main() {
 	defer jsii.Close()
 
 	app := awscdk.NewApp(nil)
 
-	NewUserBehaviorAnalyticsCdkStack(app, "UserBehaviorAnalyticsCdkStack", &UserBehaviorAnalyticsCdkStackProps{
-		awscdk.StackProps{
-			Env: env(),
+	KDSStack(app)
+
+	app.Synth(nil)
+}
+
+func KDSStack(app awscdk.App) {
+	stack := infra.NewUserBehaviorAnalyticsKDSCdkStack(app, "UserBehaviorAnalyticsCdkStack", &infra.UserBehaviorAnalyticsKDSCdkStackProps{
+		StackProps: awscdk.StackProps{
+			Env:         env(),
+			StackName:   jsii.String("UserBehaviorAnalyticsCdkStackKinesisDataStream"),
+			Description: jsii.String("use aws kinesis data stream to analytics"),
 		},
 	})
 
-	app.Synth(nil)
+	awscdk.Tags_Of(stack).Add(jsii.String("version"), jsii.String("1.0"), nil)
+	awscdk.Tags_Of(stack).Add(jsii.String("project"), jsii.String("user-behavior-analytics"), nil)
+	awscdk.Tags_Of(stack).Add(jsii.String("role"), jsii.String("user behavior analytics streamimg and stroage"), nil)
+	awscdk.Tags_Of(stack).Add(jsii.String("synthTime"), jsii.String(time.Now().Format("2006-01-02 15:04:05.999")), nil)
 }
 
 // env determines the AWS environment (account+region) in which our stack is to
