@@ -54,7 +54,7 @@ func (m TableBasics) putItem(eventItem *EventItem) (err error) {
 }
 
 // more example: https://github.com/awsdocs/aws-doc-sdk-examples/tree/main/gov2
-func init() {
+func Init() {
 	eventDynamodbTable = os.Getenv("TABLE_NAME")
 	eventSNSTopicArn = os.Getenv("TOPIC_ARN")
 	if len(eventDynamodbTable) == 0 || len(eventSNSTopicArn) == 0 {
@@ -129,5 +129,6 @@ func Handler(ctx context.Context, kinesisAnalyticsEvent events.KinesisAnalyticsO
 }
 
 func main() {
+	Init()
 	lambda.Start(Handler)
 }

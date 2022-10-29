@@ -35,8 +35,8 @@ try:
 except kinesisanalytics.exceptions.ResourceInUseException:
     print("Application already running, skipping start up step")
 
-#eventSteamName = input( "Please enter the stream name that was outputted from cdk deploy - (StreamingSolutionWithCdkStack.EventStreamName): ")
-eventSteamName = "UserBehaviorAnalyticsCdkStackKinesisDataStream-EventStream271A91DB-P73Md3bebJTf"
+eventSteamName = input(
+    "Please enter the stream name that was outputted from cdk deploy - (StreamingSolutionWithCdkStack.EventStreamName): ")
 kinesis = boto3.client("kinesis", region_name="us-east-1")
 fake = Faker()
 

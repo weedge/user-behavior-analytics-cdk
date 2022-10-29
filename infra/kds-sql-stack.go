@@ -118,7 +118,7 @@ func NewUserBehaviorAnalyticsKDSCdkStack(scope constructs.Construct, id string, 
 	saveAlertLambda := awscdklambdago.NewGoFunction(stack, jsii.String("UserBehaviorAnalytics-SaveAlertFunc"), &awscdklambdago.GoFunctionProps{
 		FunctionName: jsii.String("UserBehaviorAnalytics-SaveAlertFunc"),
 		Description:  jsii.String("reads output from our kinesis analytic app and save to DynamoDB table and write to sns for email alert"),
-		Entry:        jsii.String("src/lambda/save-alert-from-kad"),
+		Entry:        jsii.String("src/lambda/save-alert-from-kda"),
 		Environment: &map[string]*string{
 			"TABLE_NAME": userBeHaviorAbnormalTable.TableName(),
 			"TOPIC_ARN":  abnormalEventNoticationTopic.TopicArn(),
@@ -128,7 +128,7 @@ func NewUserBehaviorAnalyticsKDSCdkStack(scope constructs.Construct, id string, 
 	/*
 		saveAlertLambda := awslambda.NewFunction(stack, jsii.String("LambdaSaveAlertFunction"), &awslambda.FunctionProps{
 			Runtime: awslambda.Runtime_GO_1_X(),
-			Code:    awslambda.Code_FromAsset(jsii.String("src/lambda/save-alert-from-kad"), &awss3assets.AssetOptions{}),
+			Code:    awslambda.Code_FromAsset(jsii.String("src/lambda/save-alert-from-kda"), &awss3assets.AssetOptions{}),
 			Handler: jsii.String("lambdaHandler"), // need go build -ldflags="-s -w" -o lambdaHandler in lambda func dir with GOOS GOARCH params
 			Environment: &map[string]*string{
 				"TABLE_NAME": userBeHaviorAbnormalTable.TableName(),

@@ -13,9 +13,32 @@ func main() {
 
 	app := awscdk.NewApp(nil)
 
+	WorkshopStack(app)
+	//WorkshopCICDPipelineStack(app)
+
 	KDSStack(app)
 
 	app.Synth(nil)
+}
+
+func WorkshopStack(app awscdk.App) {
+	infra.NewCdkWsStack(app, "WorkshopCdkStack", &infra.CdkWsStackProps{
+		StackProps: awscdk.StackProps{
+			Env:         env(),
+			StackName:   jsii.String("WorkshopCdkStack"),
+			Description: jsii.String("some cdk workshop demo constructs to test,then to use it"),
+		},
+	})
+}
+
+func WorkshopCICDPipelineStack(app awscdk.App) {
+	infra.NewPipelineStack(app, "WorkshopCICDPipelineCdkStack", &infra.PipelineStackProps{
+		StackProps: awscdk.StackProps{
+			Env:         env(),
+			StackName:   jsii.String("WorkshopCICDPipelineCdkStack"),
+			Description: jsii.String("some cdk workshop pipleline demo"),
+		},
+	})
 }
 
 func KDSStack(app awscdk.App) {
