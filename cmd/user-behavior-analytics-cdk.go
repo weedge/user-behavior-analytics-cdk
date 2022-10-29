@@ -16,6 +16,8 @@ func main() {
 	WorkshopStack(app)
 	//WorkshopCICDPipelineStack(app)
 
+	RedshiftQuickSightStack(app)
+
 	KDSStack(app)
 
 	app.Synth(nil)
@@ -37,6 +39,16 @@ func WorkshopCICDPipelineStack(app awscdk.App) {
 			Env:         env(),
 			StackName:   jsii.String("WorkshopCICDPipelineCdkStack"),
 			Description: jsii.String("some cdk workshop pipleline demo"),
+		},
+	})
+}
+
+func RedshiftQuickSightStack(app awscdk.App) {
+	infra.NewRedshiftQuicksightCdkStack(app, "RedshiftQuickSightStack", &infra.RedshiftQuicksightCdkStackProps{
+		StackProps: awscdk.StackProps{
+			Env:         env(),
+			StackName:   jsii.String("RedshiftQuickSightStack"),
+			Description: jsii.String("deploy Redshift and QuickSight"),
 		},
 	})
 }

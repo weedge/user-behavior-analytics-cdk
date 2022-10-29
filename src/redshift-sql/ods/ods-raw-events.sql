@@ -32,6 +32,12 @@ iam_role 'YOUR-REDSHIFT-CLUSTER-IAM-ROLE-ARN'
 json 'auto ignorecase' 
 GZIP ACCEPTINVCHARS TRUNCATECOLUMNS TRIMBLANKS;
 
+/* Load json format PARQUET SNAPPY compressed data */
+COPY product_reviews_parquet
+FROM 's3://YOUR-BUCKET/****.parquet.snappy' 
+IAM_ROLE 'YOUR-REDSHIFT-CLUSTER-IAM-ROLE-ARN'
+FORMAT AS PARQUET;
+
 
 /* Start to analytics */
 SELECT count(*),action FROM "dev"."public"."ods_raw_event" 
