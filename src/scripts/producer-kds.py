@@ -1,6 +1,4 @@
 """Producer produces fake data to be inputted into a Kinesis stream."""
-# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: Apache-2.0
 
 import json
 import time
@@ -17,6 +15,7 @@ from faker import Faker
 try:
     kinesisanalytics = boto3.client(
         "kinesisanalyticsv2", region_name="us-east-1")
+    # aws kinesisanalyticsv2 start-application --application-name abnormality-event-detector --run-configuration { RUN-CONF }
     kinesisanalytics.start_application(
         ApplicationName="abnormality-event-detector",
         RunConfiguration={
@@ -39,12 +38,6 @@ eventSteamName = input(
     "Please enter the stream name that was outputted from cdk deploy - (StreamingSolutionWithCdkStack.EventStreamName): ")
 kinesis = boto3.client("kinesis", region_name="us-east-1")
 fake = Faker()
-
-# Base table, GUID with transaction key, GSI with a bank id (of 5 notes) pick one of the five bank IDs. Group by bank ID. sorted by etc
-
-banks = []
-for _ in range(10):
-    banks.append(fake.swift())
 
 i = 1
 total = 10

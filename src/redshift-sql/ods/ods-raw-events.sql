@@ -1,9 +1,4 @@
 /* CREATE TABLE IN ODS */
-/*
-######################################
-#        FOR JSON SOURCE FILE        #
-######################################
-*/
 CREATE TABLE IF NOT EXISTS ods_raw_event(
   eventId       varchar(64) not null distkey,
   action        varchar(256) not null,
@@ -18,6 +13,8 @@ CREATE TABLE IF NOT EXISTS ods_raw_event(
 /* ADD additional column later if needed */
 ALTER TABLE ods_raw_event
 ADD column ext varchar(100);
+
+/*--------------------------------------------------*/
 
 /* Load json format data */
 COPY ods_raw_event
@@ -38,8 +35,9 @@ FROM 's3://YOUR-BUCKET/****.parquet.snappy'
 IAM_ROLE 'YOUR-REDSHIFT-CLUSTER-IAM-ROLE-ARN'
 FORMAT AS PARQUET;
 
+/*--------------------------------------------------*/
 
 /* Start to analytics */
-SELECT count(*),action FROM "dev"."public"."ods_raw_event" 
+SELECT count(*),action FROM "user_behavior"."public"."ods_raw_event" 
 WHERE errormsg = '[error]'
 GROUP BY action;
