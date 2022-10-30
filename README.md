@@ -1,3 +1,5 @@
+# Infra
+![aws-user-behavior-analytics-infra](./docs/aws-user-behavior-analytics.drawio.png)
 # Welcome to your CDK Go project!
 
 This is a blank project for CDK development with Go.
