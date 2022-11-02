@@ -21,7 +21,7 @@ exports.handler = async function(event) {
   // method is POST and path is /event
   if (event.httpMethod == "POST"
     && event.path == "/event"
-    && length(process.env.HITS_STREAM_NAME)>0) {
+    && process.env.HITS_STREAM_NAME.length>0) {
     putRecordToKDS(event.body);
   }
 
