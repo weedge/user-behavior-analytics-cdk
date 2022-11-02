@@ -1,6 +1,8 @@
 package lib
 
 import (
+	"strings"
+
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsdynamodb"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
@@ -11,6 +13,7 @@ import (
 type HitCounterProps struct {
 	Downstream   awslambda.IFunction
 	ReadCapacity float64
+	StreamName   string
 }
 
 type hitCounter struct {
@@ -29,6 +32,9 @@ func NewHitCounter(scope constructs.Construct, id string, props *HitCounterProps
 	if props.ReadCapacity < 5 || props.ReadCapacity > 20 {
 		panic("ReadCapacity must be between 5 and 20")
 	}
+	if len(strings.Trim(props.StreamName, " ")) == 0 {
+		panic("StreamName is empty")
+	}
 
 	this := constructs.NewConstruct(scope, &id)
 
@@ -46,6 +52,7 @@ func NewHitCounter(scope constructs.Construct, id string, props *HitCounterProps
 		Environment: &map[string]*string{
 			"DOWNSTREAM_FUNCTION_NAME": props.Downstream.FunctionName(),
 			"HITS_TABLE_NAME":          table.TableName(),
+			"HITS_STREAM_NAME":         &props.StreamName,
 		},
 	})
 

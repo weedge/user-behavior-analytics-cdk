@@ -23,7 +23,3 @@ cdk.out
 # python venv
 venv
 .venv
-
-# nodejs modules
-node_modules
-package-lock.json

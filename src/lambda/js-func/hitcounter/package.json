@@ -1,0 +1,16 @@
+{
+  "name": "hitcounter",
+  "version": "1.0.0",
+  "description": "",
+  "main": "hitcounter.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@faker-js/faker": "^7.6.0",
+    "aws-sdk": "^2.1245.0",
+    "uuid": "^9.0.0"
+  }
+}

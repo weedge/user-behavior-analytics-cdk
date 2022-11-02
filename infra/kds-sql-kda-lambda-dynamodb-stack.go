@@ -8,8 +8,6 @@ import (
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsiam"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awskinesis"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awskinesisanalytics"
-	"github.com/aws/aws-cdk-go/awscdk/v2/awskinesisfirehose"
-	"github.com/aws/aws-cdk-go/awscdk/v2/awss3"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awssns"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awssnssubscriptions"
 
@@ -19,67 +17,25 @@ import (
 	"github.com/cdklabs/cdk-dynamo-table-viewer-go/dynamotableviewer"
 )
 
-type UserBehaviorAnalyticsKDSCdkStackProps struct {
+type KdsSqlKdaLambdaDynamoDBStackProps struct {
 	awscdk.StackProps
+	StreamName string
+	UseStream  awskinesis.Stream
 }
 
-func NewUserBehaviorAnalyticsKDSCdkStack(scope constructs.Construct, id string, props *UserBehaviorAnalyticsKDSCdkStackProps) awscdk.Stack {
+func NewKdsSqlKdaLambdaDynamoDBStack(scope constructs.Construct, id string, props *KdsSqlKdaLambdaDynamoDBStackProps) awscdk.Stack {
 	var sprops awscdk.StackProps
 	if props != nil {
 		sprops = props.StackProps
 	}
 	stack := awscdk.NewStack(scope, &id, &sprops)
 
-	// eventStream is a raw kinesis data stream
-	eventStream := awskinesis.NewStream(stack, jsii.String("EventStream"), nil)
-
-	// outPut the stream name so can connect our script to this stream
-	awscdk.NewCfnOutput(stack, jsii.String("EventStreamName"), &awscdk.CfnOutputProps{
-		Value: eventStream.StreamName(),
-	})
-
-	// ==== history/cold mudule ====
-	// S3 bucket that serve as the desc for raw compressed data in ODS
-	rawDataBucket := awss3.NewBucket(stack, jsii.String("RawDataBucket"), &awss3.BucketProps{
-		RemovalPolicy:     awscdk.RemovalPolicy_DESTROY, // REMOVE FOR PRODUCTION
-		AutoDeleteObjects: jsii.Bool(true),              // REMOVE FOR PROUCTION
-	})
-
-	firehoseRole := awsiam.NewRole(stack, jsii.String("firehoseRole"), &awsiam.RoleProps{
-		AssumedBy: awsiam.NewServicePrincipal(jsii.String("firehose.amazonaws.com"), nil),
-	})
-
-	eventStream.GrantRead(firehoseRole)
-	eventStream.Grant(firehoseRole, jsii.String("kinesis:DescribeStream"))
-	rawDataBucket.GrantWrite(firehoseRole, nil)
-
-	firehoseDeliveryStreamToS3 := awskinesisfirehose.NewCfnDeliveryStream(stack, jsii.String("FirehoseDeliveryStreamToS3"), &awskinesisfirehose.CfnDeliveryStreamProps{
-		DeliveryStreamName: jsii.String("RawDataStreamToS3"),
-		DeliveryStreamType: jsii.String("KinesisStreamAsSource"),
-		KinesisStreamSourceConfiguration: &awskinesisfirehose.CfnDeliveryStream_KinesisStreamSourceConfigurationProperty{
-			KinesisStreamArn: eventStream.StreamArn(),
-			RoleArn:          firehoseRole.RoleArn(),
-		},
-		S3DestinationConfiguration: &awskinesisfirehose.CfnDeliveryStream_S3DestinationConfigurationProperty{
-			BucketArn: rawDataBucket.BucketArn(),
-			RoleArn:   firehoseRole.RoleArn(),
-			BufferingHints: &awskinesisfirehose.CfnDeliveryStream_BufferingHintsProperty{
-				IntervalInSeconds: jsii.Number(60),
-				SizeInMBs:         jsii.Number(64),
-			},
-			CompressionFormat: jsii.String("GZIP"),
-			//CompressionFormat: jsii.String("UNCOMPRESSED"),
-			EncryptionConfiguration: &awskinesisfirehose.CfnDeliveryStream_EncryptionConfigurationProperty{
-				NoEncryptionConfig: jsii.String("NoEncryption"),
-			},
-			Prefix: jsii.String("raw/"),
-		},
-	})
-
-	// Ensures firehose role is created before create a Kinesis Firehose
-	firehoseDeliveryStreamToS3.Node().AddDependency(firehoseRole)
-
-	// ==== hot mudule ====
+	var eventStream awskinesis.Stream
+	if props.UseStream != nil {
+		eventStream = props.UseStream
+	} else {
+		eventStream = awskinesis.NewStream(stack, jsii.String(props.StreamName), nil)
+	}
 
 	// The DynamoDB table that stores user behavior abnormal event result by kinesis analytic app through lambda function to write
 	userBeHaviorAbnormalTable := awsdynamodb.NewTable(stack, jsii.String("UserBehaviorAbnormalEventTable"), &awsdynamodb.TableProps{
@@ -108,8 +64,9 @@ func NewUserBehaviorAnalyticsKDSCdkStack(scope constructs.Construct, id string, 
 
 	// new email subscription to alert
 	// u can new lambda subscription to send feishu or dingTalk alert
+	snsSendEmail := stack.Node().TryGetContext(jsii.String("snsSendEmail")).(string)
 	abnormalEventNoticationTopic.AddSubscription(awssnssubscriptions.NewEmailSubscription(
-		jsii.String("weege007@gmail.com"), // biz define alert email
+		jsii.String(snsSendEmail), // biz define alert email, u can change.
 		nil,
 	))
 
@@ -240,6 +197,11 @@ func NewUserBehaviorAnalyticsKDSCdkStack(scope constructs.Construct, id string, 
 		},
 	})
 	kinesisAnalyticsAppOutput.Node().AddDependency(kinesisAnalyticsAppForAbnormalityEvent)
+
+	// outPut the stream name so can connect our script to this stream
+	awscdk.NewCfnOutput(stack, jsii.String("EventStreamName"), &awscdk.CfnOutputProps{
+		Value: eventStream.StreamName(),
+	})
 
 	return stack
 }

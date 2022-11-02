@@ -43,6 +43,7 @@ func NewCdkWsStack(scope constructs.Construct, id string, props *CdkWsStackProps
 	hitcounterObj := lib.NewHitCounter(stack, "HelloHitCounter", &lib.HitCounterProps{
 		Downstream:   helloHandler,
 		ReadCapacity: 7,
+		StreamName:   stack.Node().TryGetContext(jsii.String("kinesisDataStreamName")).(string),
 	})
 
 	gateway := awsapigateway.NewLambdaRestApi(stack, jsii.String("Endpoint"), &awsapigateway.LambdaRestApiProps{

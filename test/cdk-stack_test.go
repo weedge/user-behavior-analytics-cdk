@@ -19,7 +19,7 @@ func TestHitCounterConstruct(t *testing.T) {
 
 	// WHEN
 	testFn := awslambda.NewFunction(stack, jsii.String("TestFunction"), &awslambda.FunctionProps{
-		Code:    awslambda.Code_FromAsset(jsii.String("lambda"), nil),
+		Code:    awslambda.Code_FromAsset(jsii.String("src/lambda/js-func/hello"), nil),
 		Runtime: awslambda.Runtime_NODEJS_16_X(),
 		Handler: jsii.String("hello.handler"),
 	})
@@ -37,7 +37,7 @@ func TestLambdaFunction(t *testing.T) {
 
 	// WHEN
 	testFn := awslambda.NewFunction(stack, jsii.String("TestFunction"), &awslambda.FunctionProps{
-		Code:    awslambda.Code_FromAsset(jsii.String("lambda"), nil),
+		Code:    awslambda.Code_FromAsset(jsii.String("src/lambda/js-func/hello"), nil),
 		Runtime: awslambda.Runtime_NODEJS_16_X(),
 		Handler: jsii.String("hello.handler"),
 	})
@@ -75,7 +75,7 @@ func TestTableCreatedWithEncryption(t *testing.T) {
 
 	// WHEN
 	testFn := awslambda.NewFunction(stack, jsii.String("TestFunction"), &awslambda.FunctionProps{
-		Code:    awslambda.Code_FromAsset(jsii.String("lambda"), nil),
+		Code:    awslambda.Code_FromAsset(jsii.String("src/lambda/js-func/hello"), nil),
 		Runtime: awslambda.Runtime_NODEJS_16_X(),
 		Handler: jsii.String("hello.handler"),
 	})
@@ -98,20 +98,38 @@ func TestCanPassReadCapacity(t *testing.T) {
 	defer func() {
 		if r := recover(); r == nil {
 			t.Error("Did not throw ReadCapacity error")
+		} else {
+			t.Logf("%+v\n", r)
 		}
 	}()
 
 	// GIVEN
 	stack := awscdk.NewStack(nil, nil, nil)
 
-	// WHEN
-	testFn := awslambda.NewFunction(stack, jsii.String("TestFunction"), &awslambda.FunctionProps{
-		Code:    awslambda.Code_FromAsset(jsii.String("lambda"), nil),
-		Runtime: awslambda.Runtime_NODEJS_16_X(),
-		Handler: jsii.String("hello.handler"),
-	})
+	// THEN
 	lib.NewHitCounter(stack, "MyTestConstruct", &lib.HitCounterProps{
-		Downstream:   testFn,
+		Downstream:   nil,
 		ReadCapacity: 21,
+	})
+}
+
+func TestCanPassStreamName(t *testing.T) {
+	defer jsii.Close()
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("Did not throw StreamName error")
+		} else {
+			t.Logf("%+v\n", r)
+		}
+	}()
+
+	// GIVEN
+	stack := awscdk.NewStack(nil, nil, nil)
+
+	// THEN
+	lib.NewHitCounter(stack, "MyTestConstruct", &lib.HitCounterProps{
+		Downstream:   nil,
+		ReadCapacity: 7,
+		StreamName:   "",
 	})
 }

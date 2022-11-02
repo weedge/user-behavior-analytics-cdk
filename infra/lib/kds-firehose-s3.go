@@ -13,8 +13,10 @@ import (
 )
 
 type KdsFirehoseS3Props struct {
-	StreamName        string
+	StreamName string
+	// For valid values, see the `CompressionFormat` content for the [S3DestinationConfiguration](https://docs.aws.amazon.com/firehose/latest/APIReference/API_S3DestinationConfiguration.html) data type in the *Amazon Kinesis Data Firehose API Reference* .
 	CompressionFormat string
+	UseStream         awskinesis.Stream
 }
 
 type kdsFirehoseS3Construct struct {
@@ -42,12 +44,16 @@ func NewKdsFirehoseS3Construct(scope constructs.Construct, id string, props *Kds
 	}
 
 	this := constructs.NewConstruct(scope, &id)
-
-	// new kinesis data stream
-	dataStream := awskinesis.NewStream(this, jsii.String(props.StreamName), nil)
+	var dataStream awskinesis.Stream
+	if props.UseStream != nil {
+		dataStream = props.UseStream
+	} else {
+		// new kinesis data stream
+		dataStream = awskinesis.NewStream(this, jsii.String(props.StreamName), nil)
+	}
 
 	// outPut the stream name so can connect our script to this stream
-	awscdk.NewCfnOutput(this, jsii.String("dataStreamName"), &awscdk.CfnOutputProps{
+	awscdk.NewCfnOutput(this, jsii.String("DataStreamName"), &awscdk.CfnOutputProps{
 		Value: dataStream.StreamName(),
 	})
 

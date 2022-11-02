@@ -2,7 +2,14 @@
   "app": "go mod download && go run ./cmd/user-behavior-analytics-cdk.go",
   "watch": {
     "include": ["**"],
-    "exclude": ["README.md", "cdk*.json", "go.mod", "go.sum", "**/*test.go"]
+    "exclude": [
+      "README.md",
+      "cdk*.json",
+      "go.mod",
+      "go.sum",
+      "**/*test.go",
+      "venv"
+    ]
   },
   "context": {
     "@aws-cdk/aws-apigateway:usagePlanKeyOrderInsensitiveId": true,

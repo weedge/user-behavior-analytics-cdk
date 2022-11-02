@@ -1,0 +1,5 @@
+{
+  "kinesisDataStreamName": "UserBehaviorEventStream",
+  "s3CompressionFormat": "GZIP",
+  "snsSendEmail": "ops@amazonaws.com"
+}

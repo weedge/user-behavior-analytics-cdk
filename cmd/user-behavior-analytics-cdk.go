@@ -16,18 +16,23 @@ func main() {
 	WorkshopStack(app)
 	//WorkshopCICDPipelineStack(app)
 
-	RedshiftQuickSightStack(app)
+	//RedshiftQuickSightStack(app)
 
 	KDSStack(app)
+
+	awscdk.Tags_Of(app).Add(jsii.String("version"), jsii.String("1.0"), nil)
+	awscdk.Tags_Of(app).Add(jsii.String("project"), jsii.String("user-behavior-analytics"), nil)
+	awscdk.Tags_Of(app).Add(jsii.String("role"), jsii.String("user behavior analytics streamimg and stroage"), nil)
+	awscdk.Tags_Of(app).Add(jsii.String("synthTime"), jsii.String(time.Now().Format("2006-01-02 15:04:05.999")), nil)
 
 	app.Synth(nil)
 }
 
 func WorkshopStack(app awscdk.App) {
-	infra.NewCdkWsStack(app, "WorkshopCdkStack", &infra.CdkWsStackProps{
+	infra.NewCdkWsStack(app, "CDK-Workshop-Lambda-KDS-stack", &infra.CdkWsStackProps{
 		StackProps: awscdk.StackProps{
 			Env:         env(),
-			StackName:   jsii.String("WorkshopCdkStack"),
+			StackName:   jsii.String("CDK-Workshop-lambda-KDS-stack"),
 			Description: jsii.String("some cdk workshop demo constructs to test,then to use it"),
 		},
 	})
@@ -53,19 +58,25 @@ func RedshiftQuickSightStack(app awscdk.App) {
 	})
 }
 
-func KDSStack(app awscdk.App) {
-	stack := infra.NewUserBehaviorAnalyticsKDSCdkStack(app, "UserBehaviorAnalyticsCdkStack", &infra.UserBehaviorAnalyticsKDSCdkStackProps{
+func KDSStack(app awscdk.App) awscdk.Stack {
+	kdsFirehoseS3Stack := infra.NewKdsKdfS3StackForUserBehaviorEvent(app, "KDS-KDF-S3-stack", &infra.KdsKdfS3StackProps{
 		StackProps: awscdk.StackProps{
 			Env:         env(),
-			StackName:   jsii.String("UserBehaviorAnalyticsCdkStackKinesisDataStream"),
-			Description: jsii.String("use aws kinesis data stream to analytics"),
+			StackName:   jsii.String("KdsKdfS3StackForUserBehaviorEvent"),
+			Description: jsii.String("aws kinesis data stream for firehose to s3"),
 		},
 	})
 
-	awscdk.Tags_Of(stack).Add(jsii.String("version"), jsii.String("1.0"), nil)
-	awscdk.Tags_Of(stack).Add(jsii.String("project"), jsii.String("user-behavior-analytics"), nil)
-	awscdk.Tags_Of(stack).Add(jsii.String("role"), jsii.String("user behavior analytics streamimg and stroage"), nil)
-	awscdk.Tags_Of(stack).Add(jsii.String("synthTime"), jsii.String(time.Now().Format("2006-01-02 15:04:05.999")), nil)
+	stack := infra.NewKdsSqlKdaLambdaDynamoDBStack(app, "KDS-KDA-sql-Lambda-DynamoDB-stack", &infra.KdsSqlKdaLambdaDynamoDBStackProps{
+		StackProps: awscdk.StackProps{
+			Env:         env(),
+			StackName:   jsii.String("KdsSqlKdaLambdaDynamoDBStackForUserBehaviorEvent"),
+			Description: jsii.String("use aws kinesis data stream to analytics by sql"),
+		},
+		UseStream: kdsFirehoseS3Stack.Stream(),
+	})
+
+	return stack
 }
 
 // env determines the AWS environment (account+region) in which our stack is to
