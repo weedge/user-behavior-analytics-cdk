@@ -5,6 +5,7 @@ import (
 	"user-behavior-analytics-cdk/infra"
 
 	"github.com/aws/aws-cdk-go/awscdk/v2"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awskinesis"
 	"github.com/aws/jsii-runtime-go"
 )
 
@@ -12,13 +13,12 @@ func main() {
 	defer jsii.Close()
 
 	app := awscdk.NewApp(nil)
+	kdsKdfS3, _ := KDSStack(app)
 
-	WorkshopStack(app)
+	WorkshopStack(app, kdsKdfS3.Stream())
 	//WorkshopCICDPipelineStack(app)
 
 	//RedshiftQuickSightStack(app)
-
-	KDSStack(app)
 
 	awscdk.Tags_Of(app).Add(jsii.String("version"), jsii.String("1.0"), nil)
 	awscdk.Tags_Of(app).Add(jsii.String("project"), jsii.String("user-behavior-analytics"), nil)
@@ -28,13 +28,15 @@ func main() {
 	app.Synth(nil)
 }
 
-func WorkshopStack(app awscdk.App) {
+// dependecy kds
+func WorkshopStack(app awscdk.App, eventStream awskinesis.Stream) {
 	infra.NewCdkWsStack(app, "CDK-Workshop-Lambda-KDS-stack", &infra.CdkWsStackProps{
 		StackProps: awscdk.StackProps{
 			Env:         env(),
 			StackName:   jsii.String("CDK-Workshop-lambda-KDS-stack"),
 			Description: jsii.String("some cdk workshop demo constructs to test,then to use it"),
 		},
+		EventStream: eventStream,
 	})
 }
 
@@ -58,7 +60,7 @@ func RedshiftQuickSightStack(app awscdk.App) {
 	})
 }
 
-func KDSStack(app awscdk.App) awscdk.Stack {
+func KDSStack(app awscdk.App) (infra.KdsKdfS3Stack, awscdk.Stack) {
 	kdsFirehoseS3Stack := infra.NewKdsKdfS3StackForUserBehaviorEvent(app, "KDS-KDF-S3-stack", &infra.KdsKdfS3StackProps{
 		StackProps: awscdk.StackProps{
 			Env:         env(),
@@ -76,7 +78,7 @@ func KDSStack(app awscdk.App) awscdk.Stack {
 		UseStream: kdsFirehoseS3Stack.Stream(),
 	})
 
-	return stack
+	return kdsFirehoseS3Stack, stack
 }
 
 // env determines the AWS environment (account+region) in which our stack is to

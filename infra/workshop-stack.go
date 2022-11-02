@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsapigateway"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awskinesis"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
@@ -13,6 +14,7 @@ import (
 
 type CdkWsStackProps struct {
 	awscdk.StackProps
+	EventStream awskinesis.Stream
 }
 type cdkWsStack struct {
 	awscdk.Stack
@@ -43,7 +45,7 @@ func NewCdkWsStack(scope constructs.Construct, id string, props *CdkWsStackProps
 	hitcounterObj := lib.NewHitCounter(stack, "HelloHitCounter", &lib.HitCounterProps{
 		Downstream:   helloHandler,
 		ReadCapacity: 7,
-		StreamName:   stack.Node().TryGetContext(jsii.String("kinesisDataStreamName")).(string),
+		EventStream:  props.EventStream,
 	})
 
 	gateway := awsapigateway.NewLambdaRestApi(stack, jsii.String("Endpoint"), &awsapigateway.LambdaRestApiProps{

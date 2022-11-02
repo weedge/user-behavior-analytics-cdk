@@ -93,7 +93,7 @@ func TestTableCreatedWithEncryption(t *testing.T) {
 	})
 }
 
-func TestCanPassReadCapacity(t *testing.T) {
+func TestCantPassReadCapacity(t *testing.T) {
 	defer jsii.Close()
 	defer func() {
 		if r := recover(); r == nil {
@@ -113,11 +113,11 @@ func TestCanPassReadCapacity(t *testing.T) {
 	})
 }
 
-func TestCanPassStreamName(t *testing.T) {
+func TestCantPassStream(t *testing.T) {
 	defer jsii.Close()
 	defer func() {
 		if r := recover(); r == nil {
-			t.Error("Did not throw StreamName error")
+			t.Error("Did not throw StreamObj error")
 		} else {
 			t.Logf("%+v\n", r)
 		}
@@ -130,6 +130,6 @@ func TestCanPassStreamName(t *testing.T) {
 	lib.NewHitCounter(stack, "MyTestConstruct", &lib.HitCounterProps{
 		Downstream:   nil,
 		ReadCapacity: 7,
-		StreamName:   "",
+		EventStream:  nil,
 	})
 }

@@ -1,10 +1,9 @@
 package lib
 
 import (
-	"strings"
-
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsdynamodb"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awskinesis"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
@@ -13,7 +12,7 @@ import (
 type HitCounterProps struct {
 	Downstream   awslambda.IFunction
 	ReadCapacity float64
-	StreamName   string
+	EventStream  awskinesis.Stream
 }
 
 type hitCounter struct {
@@ -32,8 +31,8 @@ func NewHitCounter(scope constructs.Construct, id string, props *HitCounterProps
 	if props.ReadCapacity < 5 || props.ReadCapacity > 20 {
 		panic("ReadCapacity must be between 5 and 20")
 	}
-	if len(strings.Trim(props.StreamName, " ")) == 0 {
-		panic("StreamName is empty")
+	if props.EventStream == nil || props.EventStream.StreamName() == nil {
+		panic("eventStream is nil")
 	}
 
 	this := constructs.NewConstruct(scope, &id)
@@ -52,12 +51,13 @@ func NewHitCounter(scope constructs.Construct, id string, props *HitCounterProps
 		Environment: &map[string]*string{
 			"DOWNSTREAM_FUNCTION_NAME": props.Downstream.FunctionName(),
 			"HITS_TABLE_NAME":          table.TableName(),
-			"HITS_STREAM_NAME":         &props.StreamName,
+			"HITS_STREAM_NAME":         props.EventStream.StreamName(),
 		},
 	})
 
 	table.GrantReadWriteData(handler)
 	props.Downstream.GrantInvoke(handler)
+	props.EventStream.GrantWrite(handler)
 
 	return &hitCounter{this, handler, table}
 }
