@@ -15,6 +15,8 @@ exports.handler = async function(event) {
     ExpressionAttributeValues: { ':incr': { N: '1' } }
   }).promise();
 
+  // TODO: put event item to kinesis data streams  or async call downstream function
+
   // call downstream function and capture response
   const resp = await lambda.invoke({
     FunctionName: process.env.DOWNSTREAM_FUNCTION_NAME,

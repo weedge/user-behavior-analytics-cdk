@@ -47,7 +47,7 @@ func (m TableBasics) putItem(eventItem *EventItem) (err error) {
 		ConditionExpression: aws.String("attribute_not_exists(inspectedAt)"),
 	})
 	if err != nil {
-		log.Printf("Couldn't add item to table. Here's why: %v\n", err)
+		log.Printf("[ERROR] Couldn't add item to table. Here's why: %v\n", err)
 	}
 
 	return

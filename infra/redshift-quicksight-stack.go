@@ -71,6 +71,13 @@ func NewRedshiftQuicksightCdkStack(scope constructs.Construct, id string, props 
 		Description:   jsii.String("Redshift cluster secret"),
 		RemovalPolicy: awscdk.RemovalPolicy_DESTROY,
 		SecretName:    jsii.String("RedshiftClusterSecret"),
+		GenerateSecretString: &awssecretsmanager.SecretStringGenerator{
+			ExcludePunctuation:   jsii.Bool(true),
+			GenerateStringKey:    jsii.String("password"),
+			IncludeSpace:         jsii.Bool(false),
+			PasswordLength:       jsii.Number(16),
+			SecretStringTemplate: stack.ToJsonString(map[string]interface{}{"username": "Administrator"}, nil),
+		},
 	})
 
 	defPassword := awscdk.NewCfnParameter(stack, jsii.String("password"), &awscdk.CfnParameterProps{

@@ -19,3 +19,7 @@ go.work.sum
 # CDK asset staging directory
 .cdk.staging
 cdk.out
+
+# python venv
+venv
+.venv
